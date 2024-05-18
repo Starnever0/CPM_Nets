@@ -9,8 +9,8 @@ This repository contains the code for our NeurIPS'19 Spotlight paper [CPM-Nets: 
 
 - TensorFlow 1.12.0
 - Python 3.6.7
-- sklearn
-- numpy
+- sklearn 0.20.4
+- numpy 1.16.2
 - scipy
 
 ## Introduction

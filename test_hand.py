@@ -1,8 +1,11 @@
 import numpy as np
+import scipy.io as sio
 from util.util import read_data
 from util.get_sn import get_sn
 from util.model import CPMNets
+from util.model_gan import CPMGAN
 import util.classfiy as classfiy
+from util.cluster import print_result
 from sklearn.metrics import accuracy_score
 import os
 import warnings
@@ -22,6 +25,8 @@ if __name__ == "__main__":
                         help='trade off parameter [default: 1]')
     parser.add_argument('--missing-rate', type=float, default=0,
                         help='view missing rate [default: 0]')
+    parser.add_argument('--model', type=str, default='cpmnets', choices = ["cpmnets", "cpmgan"],
+                        help='model name [default: cpmnets]')
     args = parser.parse_args()
 
     # read data
@@ -32,18 +37,31 @@ if __name__ == "__main__":
     # set parameter
     epoch = [args.epochs_train, args.epochs_test]
     learning_rate = [0.01, 0.01]
+    # # 适合聚类的学习率
+    # learning_rate = [0.001, 0.01]
     # Randomly generated missing matrix
     Sn = get_sn(view_num, trainData.num_examples + testData.num_examples, args.missing_rate)
     Sn_train = Sn[np.arange(trainData.num_examples)]
     Sn_test = Sn[np.arange(testData.num_examples) + trainData.num_examples]
     # Model building
-    model = CPMNets(view_num, trainData.num_examples, testData.num_examples, layer_size, args.lsd_dim, learning_rate,
-                    args.lamb)
-    # train
-    model.train(trainData.data, Sn_train, trainData.labels.reshape(trainData.num_examples), epoch[0])
-    H_train = model.get_h_train()
-    # test
-    model.test(testData.data, Sn_test, testData.labels.reshape(testData.num_examples), epoch[1])
-    H_test = model.get_h_test()
-    label_pre = classfiy.ave(H_train, H_test, trainData.labels)
-    print('Accuracy on the test set is {:.4f}'.format(accuracy_score(testData.labels, label_pre)))
+    if(args.model == 'cpmnets'):
+        model = CPMNets(view_num, trainData.num_examples, testData.num_examples, layer_size, args.lsd_dim, learning_rate,
+                        args.lamb)
+        # train
+        model.train(trainData.data, Sn_train, trainData.labels.reshape(trainData.num_examples), epoch[0])
+        H_train = model.get_h_train()
+        # test
+        model.test(testData.data, Sn_test, testData.labels.reshape(testData.num_examples), epoch[1])
+        H_test = model.get_h_test()
+    elif(args.model == 'cpmgan'):
+        model = CPMGAN(view_num, trainData.num_examples, testData.num_examples, layer_size, args.lsd_dim, learning_rate)
+        # 无监督不需要标签
+        model.train(trainData.data, Sn_train, epoch[0])
+        H = model.get_h_train()
+        gt = trainData.labels
+   
+    if args.model == 'cpmnets':
+        label_pre = classfiy.ave(H_train, H_test, trainData.labels)
+        print('Accuracy on the test set is {:.4f}'.format(accuracy_score(testData.labels, label_pre)))
+    elif args.model == 'cpmgan':
+        print_result(10, H, gt)

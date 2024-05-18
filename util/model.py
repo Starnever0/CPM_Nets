@@ -125,6 +125,8 @@ class CPMNets():
         return tf.reduce_sum(tf.nn.relu(tf.add(theta, tf.subtract(F_h_h_mean_max, F_h_hn_mean))))
 
     def train(self, data, sn, gt, epoch, step=[5, 5]):
+        # step[0] is the number of iterations of the network
+        # step[1] is the number of iterations of the global Reconstruction_LOSS
         global Reconstruction_LOSS
         index = np.array([x for x in range(self.trainLen)])
         shuffle(index)
