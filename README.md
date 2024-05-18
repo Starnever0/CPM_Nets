@@ -1,5 +1,10 @@
 # CPM-Nets: Cross Partial Multi-View Networks
 
+在CPM-nets基础上实现了无监督的CPMGAN（model_gan.py）只测试了Handwritten
+运行以下命令使用CPM-GAN：
+'''
+python test_hand.py --model cpmgan --missing-rate 0.1
+'''
 This repository contains the code for our NeurIPS'19 Spotlight paper [CPM-Nets: Cross Partial Multi-View Networks](https://github.com/hanmenghan/CPM_Nets/blob/master/paper/). Datasets can be obtained [here](https://drive.google.com/drive/folders/1TKiyL7vCq6DpFDMrQXIJdUcbVK6SIyhk?usp=sharing). 
 ## Framework
 
